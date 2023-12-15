@@ -47,6 +47,7 @@ class Player:
     def __init__(self):
         self._hand = []
         self._points = 0
+        self._bid = 0
 
     def add_card(self, card):
         self._hand.append(card)
@@ -68,6 +69,9 @@ class Player:
             list_of_cards.append(f'{card.name} of {card.suit}')
         return list_of_cards
 
+    def set_bid(self, bid):
+        self._bid = bid
+
 
 class Musik:
     def __init__(self):
@@ -78,3 +82,22 @@ class Musik:
 
     def cards_in_musik(self):
         return self._cards
+
+
+class Computer(Player):
+    def __init__(self):
+        super().__init__()
+
+    def make_move(self):
+        # This is a simple sketch, before apllying an algorithm for making
+        # moves, i start by playing the first card
+        if self._hand:
+            card_to_play = self._hand[0]
+            played_card = self.play_card(card_to_play)
+            return played_card
+        else:
+            return None
+
+    def decide_to_bid(self):
+        # This is a sketch too, now computer always passes
+        return False

@@ -1,4 +1,4 @@
-from classes import Card, Deck, Player, Musik
+from classes import Card, Deck, Player, Musik, Computer
 
 
 # Testy dla klasy Card
@@ -93,3 +93,21 @@ def test_cards_in_musik():
     assert len(cards_in_musik) == 2
     assert card_1 in cards_in_musik
     assert card_2 in cards_in_musik
+
+
+# Wstępne testy dla wersji testowej klasy Computer
+def test_Computer_make_move():
+    computer = Computer()
+    card_1 = Card("Ace", "Spades", 11)
+    card_2 = Card("10", "Hearts", 10)
+    computer.add_card(card_1)
+    computer.add_card(card_2)
+    played_card = computer.make_move()
+    assert played_card == card_1
+    assert len(computer._hand) == 1
+
+
+def test_Computer_decide_to_bid():
+    computer = Computer()
+    decision = computer.decide_to_bid()
+    assert not decision
