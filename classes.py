@@ -20,6 +20,10 @@ class Card:
     def points(self):
         return self._points
 
+    def __str__(self):
+        desc = f'{self.name} of {self.suit}'
+        return desc
+
 
 class Deck:
     def __init__(self):
@@ -52,12 +56,10 @@ class Player:
     def add_card(self, card):
         self._hand.append(card)
 
-    def play_card(self, card):
-        if card in self._hand:
-            self._hand.remove(card)
-            return card
-        else:
-            return None
+    def play_card(self, card_number):
+        card = self._hand[card_number]
+        self._hand.remove(card)
+        return card
 
     def add_from_musik(self, musik):
         for card in musik.cards_in_musik():
@@ -67,8 +69,13 @@ class Player:
     def show_hand(self):
         list_of_cards = []
         for card in self._hand:
-            list_of_cards.append(f'{card.name} of {card.suit}')
+            list_of_cards.append(str(card))
         return list_of_cards
+
+    def cards_display(self):
+        list_of_cards = self.show_hand()
+        result = "Yours cards: " + ', '.join(list_of_cards) + '.'
+        return result
 
     def set_bid(self, bid):
         self._bid = bid
@@ -77,6 +84,13 @@ class Player:
         card = self._hand[number]
         self._hand.remove(card)
         opponent.add_card(card)
+
+    def add_points(self, points):
+        self._points += points
+
+    @property
+    def cards_in_hand(self):
+        return len(self._hand)
 
     @property
     def bid(self):
@@ -101,12 +115,11 @@ class Computer(Player):
     def __init__(self):
         super().__init__()
 
-    def make_move(self):
+    def make_move(self, opponent_card=''):
         # This is a simple sketch, before apllying an algorithm for making
         # moves, i start by playing the first card
         if self._hand:
-            card_to_play = self._hand[0]
-            played_card = self.play_card(card_to_play)
+            played_card = self.play_card(0)
             return played_card
         else:
             return None
@@ -140,19 +153,3 @@ class Game:
             return True
         else:
             return False
-
-    def play_round(self):
-        if self._round == 'p':
-            card_p = self._player.play_card(self._player._hand[0])
-            # Choosing card will be implemented later
-            card_c = self._computer.make_move()
-        else:
-            card_p = self._player.play_card(self._player._hand[0])
-            # Choosing card will be implemented later
-            card_c = self._computer.make_move()
-        if card_p.points > card_c.points:
-            self._round = 'p'
-            self._player._points += card_c.points
-        else:
-            self._round = 'c'
-            self._computer._points += card_p.points

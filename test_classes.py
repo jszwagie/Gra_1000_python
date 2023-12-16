@@ -40,24 +40,15 @@ def test_Player_play_card():
     card_2 = Card("King", "Hearts", 4)
     player.add_card(card_1)
     player.add_card(card_2)
-    played_card = player.play_card(card_1)
+    played_card = player.play_card(0)
     assert played_card == card_1
-    assert len(player._hand) == 1
-
-
-def test_Player_play_card_not_in_hand():
-    player = Player()
-    card_1 = Card("Ace", "Spades", 11)
-    card_2 = Card("10", "Diamonds", 10)
-    player.add_card(card_1)
-    played_card = player.play_card(card_2)
-    assert played_card is None
     assert len(player._hand) == 1
 
 
 def test_add_from_musik():
     player = Player()
-    musik = [Card("Ace", "Spades", 11), Card("10", "Hearts", 10)]
+    musik = Musik()
+    musik._cards = [Card("Ace", "Spades", 11), Card("10", "Hearts", 10)]
     player.add_from_musik(musik)
     assert len(player._hand) == 2
 
