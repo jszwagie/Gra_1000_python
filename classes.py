@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from random import shuffle
+from random import shuffle, randint
 
 
 @dataclass
@@ -127,6 +127,15 @@ class Computer(Player):
     def decide_to_bid(self):
         # This is a sketch too, now computer always passes
         return False
+
+    def choose_musik(self):
+        return randint(0, 1)
+
+    def give_card(self, number, opponent):
+        card = self._hand[number]
+        self._hand.remove(card)
+        opponent.add_card(card)
+        return card
 
 
 class Game:

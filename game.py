@@ -1,6 +1,40 @@
 from classes import Deck, Player, Musik, Computer, Game
 
 
+def bidding(game):
+    list_of_bids = list(range(100, 361))
+    list_of_bids = list_of_bids[::10]
+    list_of_bids.append("pass")
+    player = game._player
+    computer = game._computer
+    not_passed = True
+    while not_passed:
+        print("How much are you bidding?:")
+        player_bid = input(">")
+        if str(player_bid).lower() == "pass":
+            print("You passed")
+            player.set_bid(-1)
+            game._round = 'c'
+            not_passed = False
+            chosen_musik = computer.choose_musik()
+            continue
+        elif player_bid not in list_of_bids:
+            print("You must bid points between 100 and 360, or pass")
+            continue
+        else:
+            player.set_bid(player_bid)
+        if computer.decide_to_bid():
+            pass
+        else:
+            print('Opponent passed')
+            game._round = 'p'
+            computer.set_bid(-1)
+            not_passed = False
+            print('Choose a musik to get(1,2): ')
+            chosen_musik = int(input('>')) - 1
+    return chosen_musik
+
+
 def cards_battle(p_card, c_card, game):
     if p_card.points > c_card.points:
         game._player.add_points(p_card.points + c_card.points)
@@ -37,20 +71,21 @@ def play_round(game):
         if next_round == 'p':
             print('You won!')
         else:
-            print('Computer won')
+            print('Opponent won')
     game._round = next_round
 
 
 def starting_player_clear_musik(chosen_musik, game):
-    chosen_musik -= 1
-    game._player.add_from_musik(game._musiki[chosen_musik])
     if game._round == 'p':
+        game._player.add_from_musik(game._musiki[chosen_musik])
         print(game._player.cards_display())
         print("Choose a card for your opponent (1 - 12):")
         card = int(input(">")) - 1
         game._player.give_card(card, game._computer)
     else:
-        game._computer.give_card(0, game._player)
+        game._computer.add_from_musik(game._musiki[chosen_musik])
+        card = game._computer.give_card(0, game._player)
+        print(f'Opponent gave you card: {card}')
 
 
 def main():
@@ -63,21 +98,7 @@ def main():
     game = Game(deck, player, computer, musiki)
     print('Welcome to the game "1000", cards are being dealt.')
     game.deal_the_cards()
-    print("Insert your bid:")
-    not_passed = True
-    chosen_musik = 1
-    while not_passed:
-        player_bid = input(">")
-        if player_bid == "pass":
-            player.set_bid(-1)
-            game._round = 'c'
-            not_passed = False
-        elif computer.decide_to_bid() is False:
-            print('Opponent passed')
-            game._round = 'p'
-            computer.set_bid(-1)
-            not_passed = False
-            chosen_musik = int(input('Choose a musik to get: '))
+    chosen_musik = bidding(game)
     starting_player_clear_musik(chosen_musik, game)
     for _ in range(11):
         play_round(game)
