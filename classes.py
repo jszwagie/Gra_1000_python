@@ -87,10 +87,18 @@ class Player:
     def set_bid(self, bid):
         self._bid = bid
 
-    def give_card(self, number, opponent):
+    def remove_card(self, number):
         card = self._hand[number]
         self._hand.remove(card)
-        opponent.add_card(card)
+        return card
+
+    def remove_after_musik(self, cards):
+        cards_discard = []
+        for number in cards:
+            cards_discard.append(self._hand[number])
+        for card in cards_discard:
+            self._hand.remove(card)
+        return cards_discard
 
     def add_points(self, points):
         self._points += points
@@ -124,6 +132,10 @@ class Musik:
 
     def cards_in_musik(self):
         return self._cards
+
+    def __str__(self):
+        result = f'{self._cards[0]}, {self._cards[1]}'
+        return result
 
     def clear(self):
         self._cards.clear()
@@ -191,6 +203,32 @@ class Computer(Player):
         self._hand.remove(card)
         opponent.add_card(card)
         return card
+
+    def remove_after_musik(self):
+        cards = self.choose_to_remove()
+        for card in cards:
+            self._hand.remove(card)
+        return cards
+
+    def choose_to_remove(self):
+        trumps = self.have_trump()
+        points = [0, 2, 3, 4, 10, 11]
+        cards_to_remove = []
+        names = ["Queen", "King"]
+        for point in points:
+            for card in self._hand:
+                if len(cards_to_remove) == 2:
+                    return cards_to_remove
+                else:
+                    if card.name not in names and card.suit not in trumps:
+                        if card.points == point:
+                            cards_to_remove.append(card)
+        copy = self._hand.copy()
+        while len(cards_to_remove) != 2:
+            card = choice(copy)
+            cards_to_remove.append(card)
+            copy = copy.remove(card)
+        return cards_to_remove
 
 
 class Game:

@@ -10,3 +10,4 @@ print(p)
 list_of_bids = list(range(100, 361))
 list_of_bids = [str(element) for element in list(range(100, 361))]
 print(list_of_bids[::10])
+print(list(range(1, 13)))

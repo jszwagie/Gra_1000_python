@@ -1,6 +1,40 @@
 from classes import Deck, Player, Musik, Computer, Game
 
 
+def input_cards_to_discard():
+    bad_input = True
+    while bad_input:
+        try:
+            cards = input(">")
+            cards = cards.split(", ")
+            card_1 = int(cards[0])
+            card_2 = int(cards[1])
+            if (card_1 in range(1, 13) and card_2 in range(1, 13) and
+               card_1 != card_2):
+                cards_numbers = [card_1 - 1, card_2 - 1]
+                bad_input = False
+            else:
+                raise Exception
+        except Exception:
+            print('I do not know what you mean.'
+                  'Try again with "number, number".')
+    return cards_numbers
+
+
+def input_musik():
+    bad_input = True
+    while bad_input:
+        try:
+            chosen_musik = int(input(">")) - 1
+            if chosen_musik in [0, 1]:
+                bad_input = False
+            else:
+                raise Exception
+        except Exception:
+            print("There is no musik with this number. Try again.")
+    return chosen_musik
+
+
 def bidding(game):
     list_of_bids = [str(element) for element in list(range(100, 361))]
     list_of_bids = list_of_bids[::10]
@@ -35,7 +69,7 @@ def bidding(game):
             computer.set_bid(-1)
             not_passed = False
             print('Choose a musik to get(1,2): ')
-            chosen_musik = int(input('>')) - 1
+            chosen_musik = input_musik()
     return chosen_musik
 
 
@@ -83,13 +117,17 @@ def starting_player_clear_musik(chosen_musik, game):
     if game._round == 'p':
         game._player.add_from_musik(game._musiki[chosen_musik])
         print(game._player.cards_display())
-        print("Choose a card for your opponent (1 - 12):")
-        card = int(input(">")) - 1
-        game._player.give_card(card, game._computer)
+        print("Choose two cards to discard (number, number)(1-12):")
+        cards = input_cards_to_discard()
+        card_1, card_2 = game._player.remove_after_musik(cards)
+        print(f"You discarded: {card_1}, {card_2}.")
     else:
-        game._computer.add_from_musik(game._musiki[chosen_musik])
-        card = game._computer.give_card(0, game._player)
-        print(f'Opponent gave you card: {card}')
+        musik = game._musiki[chosen_musik]
+        print(f"Opponent chose {chosen_musik+1} Musik: {musik}")
+        game._computer.add_from_musik(musik)
+        print(game._computer.cards_display())
+        card_1, card_2 = game._computer.remove_after_musik()
+        print(game._computer.cards_display())
 
 
 def main():
@@ -104,7 +142,7 @@ def main():
     game.deal_the_cards()
     chosen_musik = bidding(game)
     starting_player_clear_musik(chosen_musik, game)
-    for _ in range(11):
+    for _ in range(10):
         play_round(game)
     print(f'You have {game._player._points} points,'
           f' Opponent have {game._computer._points} points')
