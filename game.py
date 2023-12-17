@@ -2,7 +2,7 @@ from classes import Deck, Player, Musik, Computer, Game
 
 
 def bidding(game):
-    list_of_bids = list(range(100, 361))
+    list_of_bids = [str(element) for element in list(range(100, 361))]
     list_of_bids = list_of_bids[::10]
     list_of_bids.append("pass")
     player = game._player
@@ -18,13 +18,17 @@ def bidding(game):
             not_passed = False
             chosen_musik = computer.choose_musik()
             continue
-        elif player_bid not in list_of_bids:
-            print("You must bid points between 100 and 360, or pass")
+        elif (player_bid not in list_of_bids or
+              computer.bid > int(player_bid)):
+            print("You must bid points between 100 and 360, "
+                  "tens, higher than opponent or pass")
             continue
         else:
             player.set_bid(player_bid)
-        if computer.decide_to_bid():
-            pass
+        if computer.decide_to_bid(int(player_bid)):
+            computer.set_bid(computer.make_a_bid(int(player_bid)))
+            print(f"Opponent bidded: {computer.bid}")
+            continue
         else:
             print('Opponent passed')
             game._round = 'p'

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from random import shuffle, randint
+from random import shuffle, randint, choice
 
 
 @dataclass
@@ -23,6 +23,13 @@ class Card:
     def __str__(self):
         desc = f'{self.name} of {self.suit}'
         return desc
+
+    def __eq__(self, other):
+        if (self.name == other._name and self.suit == other.suit and
+           self.points == other.points):
+            return True
+        else:
+            return False
 
 
 class Deck:
@@ -88,6 +95,17 @@ class Player:
     def add_points(self, points):
         self._points += points
 
+    def have_trump(self):
+        # suits = {'Spades': 40, 'Hearts': 100, 'Clubs': 60, 'Diamonds': 80}
+        trumps = []
+        suits = ['Spades', 'Hearts', 'Clubs', 'Diamonds']
+        for suit in suits:
+            queen_card = Card('Queen', suit, 3)
+            king_card = Card('King', suit, 4)
+            if queen_card in self._hand and king_card in self._hand:
+                trumps.append(suit)
+        return trumps
+
     @property
     def cards_in_hand(self):
         return len(self._hand)
@@ -124,9 +142,46 @@ class Computer(Player):
         else:
             return None
 
-    def decide_to_bid(self):
-        # This is a sketch too, now computer always passes
-        return False
+    def points_from_trumps(self):
+        trumps = self.have_trump()
+        points = 0
+        suits = {'Spades': 40, 'Hearts': 100, 'Clubs': 60, 'Diamonds': 80}
+        for element in trumps:
+            points += suits[element]
+        return points
+
+    def possible_points(self, opponent_bid):
+        possible_points = 0
+        trump_points = self.points_from_trumps()
+        trumps = self.have_trump()
+        winning_cards = []
+        for card in self._hand:
+            if card.suit in trumps:
+                winning_cards.append(card)
+            elif card.points >= 10:
+                winning_cards.append(card)
+        for card in winning_cards:
+            possible_points += card.points
+        possible_points += trump_points
+        points_to_bid = min(max(100, possible_points), 360)
+        points_to_bid -= points_to_bid % 10
+        if points_to_bid > opponent_bid:
+            return points_to_bid
+        else:
+            return 0
+
+    def decide_to_bid(self, opponent_bid):
+        points = self.possible_points(opponent_bid)
+        if points == 0:
+            return False
+        else:
+            return True
+
+    def make_a_bid(self, opponent_bid):
+        max_points = self.possible_points(opponent_bid)
+        bid = opponent_bid + choice([10, 20])
+        points = min(bid, max_points)
+        return points
 
     def choose_musik(self):
         return randint(0, 1)
