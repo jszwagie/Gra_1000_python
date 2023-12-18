@@ -100,33 +100,48 @@ def bidding(game):
     return chosen_musik
 
 
-def points_battle(p_card, c_card, game):
+def points_battle(p_card, c_card):
     if p_card.points > c_card.points:
-        game._player.add_points(p_card.points + c_card.points)
-        next_round = 'p'
+        return p_card
     else:
-        game._computer.add_points(p_card.points + c_card.points)
-        next_round = 'c'
-    return next_round
+        return c_card
 
 
-def cards_battle_p(first_card, second_card, game):
+def cards_battle(first_card, second_card, game):
     if first_card.suit == game.active_trump:
         if second_card.suit == game.active_trump:
-            next_round = points_battle(first_card, second_card, game)
+            winning_card = points_battle(first_card, second_card)
         else:
-            game._player.add_points(first_card.points + second_card.points)
-            next_round = 'p'
+            winning_card = first_card
     else:
         if second_card.suit == game.active_trump:
-            game._computer.add_points(first_card.points + second_card.points)
-            next_round = 'c'
+            winning_card = second_card
         else:
             if first_card.suit == second_card.suit:
-                next_round = points_battle(first_card, second_card, game)
+                winning_card = points_battle(first_card, second_card)
             else:
-                game._player.add_points(first_card.points + second_card.points)
-                next_round = 'p'
+                winning_card = first_card
+    return winning_card
+
+
+def battle(player_card, computer_card, game):
+    points_for_win = player_card.points + computer_card.points
+    if game._round == 'p':
+        winning_card = cards_battle(player_card, computer_card, game)
+        if winning_card == player_card:
+            game._player.add_points(points_for_win)
+            next_round = 'p'
+        else:
+            game._computer.add_points(points_for_win)
+            next_round = 'c'
+    else:
+        winning_card = cards_battle(computer_card, player_card, game)
+        if winning_card == computer_card:
+            game._computer.add_points(points_for_win)
+            next_round = 'c'
+        else:
+            game._player.add_points(points_for_win)
+            next_round = 'p'
     return next_round
 
 
@@ -162,11 +177,11 @@ def play_round(game):
         check_declaration(played_p_card, game, game._player)
         played_c_card = game._computer.make_move(game, played_p_card)
         print(f'Opponent played: {played_c_card}.')
-        next_round = cards_battle_p(played_p_card, played_c_card, game)
+        next_round = battle(played_p_card, played_c_card, game)
         if next_round == 'p':
             print('You won!')
         else:
-            print('Computer won')
+            print('Opponent won')
     else:
         played_c_card = game._computer.make_move(game)
         print(f'Opponent played: {played_c_card}.')
@@ -180,7 +195,7 @@ def play_round(game):
             invalid_card = check_played_card(card, played_c_card, game)
         played_p_card = game._player.play_card(card_number)
         print(f'You played: {played_p_card}.')
-        next_round = points_battle(played_p_card, played_c_card, game) # do zrobienia
+        next_round = battle(played_p_card, played_c_card, game)
         if next_round == 'p':
             print('You won!')
         else:
