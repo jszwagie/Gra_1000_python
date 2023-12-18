@@ -158,15 +158,50 @@ class Musik:
 class Computer(Player):
     def __init__(self):
         super().__init__()
+        self._temporary_trump = ''
+        self._trump_declared = False
+
+    def pri_first(self, card):
+        if card.name == 'Ace':
+            return -1
+        elif card.suit in self._trumps and card.name in ["Queen", "King"]:
+            return 12
+        else:
+            return card.points
+
+    def pri_suit(self, card, suit):
+        priority = 0
+        if card.suit == suit:
+            priority += 100
+        priority += card.points
+        return priority
 
     def make_move(self, game, opponent_card=None):
-        # This is a simple sketch, before apllying an algorithm for making
-        # moves, i start by playing the first card
-        if self._hand:
-            played_card = self.play_card(0)
-            return played_card
+        hand = self._hand
+        trumps = self._trumps
+        if game.active_trump != self._temporary_trump:
+            self._temporary_trump = ''
+        if not self.suit_in_hand(self._temporary_trump):
+            if len(trumps) > 1:
+                trumps = sorted(trumps, key=lambda x: game.trump_value(x),
+                                reverse=True)
+            if trumps:
+                self._temporary_trump = trumps[0]
+        if opponent_card:
+            base_suit = opponent_card.suit
+            pri_cards = sorted(hand, key=lambda x: self.pri_suit(x, base_suit),
+                               reverse=True)
+            card_to_play_index = hand.index(pri_cards[0])
         else:
-            return None
+            if self._temporary_trump and not self._trump_declared:
+                card = Card("Queen", self._temporary_trump, 3)
+                card_to_play_index = hand.index(card)
+                self._trump_declared = True
+            else:
+                pri_cards = sorted(hand, key=lambda x: self.pri_first(x))
+                card_to_play_index = hand.index(pri_cards[0])
+        played_card = self.play_card(card_to_play_index)
+        return played_card
 
     def points_from_trumps(self):
         trumps = self.have_trump()

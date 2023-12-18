@@ -85,7 +85,7 @@ def bidding(game):
                   "tens, higher than opponent or pass")
             continue
         else:
-            player.set_bid(player_bid)
+            player.set_bid(int(player_bid))
         if computer.decide_to_bid(int(player_bid)):
             computer.set_bid(computer.make_a_bid(int(player_bid)))
             print(f"Opponent bidded: {computer.bid}")
