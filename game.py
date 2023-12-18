@@ -74,7 +74,7 @@ def bidding(game):
         is_exit(player_bid)
         if str(player_bid).lower() == "pass":
             print("You passed")
-            player.set_bid(-1)
+            player.set_bid(0)
             game._round = 'c'
             not_passed = False
             chosen_musik = computer.choose_musik()
@@ -93,7 +93,7 @@ def bidding(game):
         else:
             print('Opponent passed')
             game._round = 'p'
-            computer.set_bid(-1)
+            computer.set_bid(0)
             not_passed = False
             print('Choose a musik to get(1,2): ')
             chosen_musik = input_musik()
@@ -222,6 +222,44 @@ def starting_player_clear_musik(chosen_musik, game):
         game._computer.set_trumps()
 
 
+def count_final_points(points, bid):
+    if points < bid:
+        final_points = 0 - points
+    elif bid == 0:
+        final_points = points
+    else:
+        final_points = bid
+    return (round(final_points/10)*10)
+
+
+def summary(game):
+    p_points = game._player._points
+    c_points = game._computer._points
+    p_bid = game._player.bid
+    c_bid = game._computer.bid
+    print(f"You've got {p_points} points,"
+          f' Opponent has got {c_points} points')
+    if p_bid > 0:
+        print(f'You bidded {p_bid}')
+    else:
+        print("You passed")
+    if c_bid > 0:
+        print(f'Opponent bidded {c_bid}')
+    else:
+        print("Opponent passed")
+    final_p_points = count_final_points(p_points, p_bid)
+    final_c_points = count_final_points(c_points, c_bid)
+    print('Final points are going to be rounded')
+    print('Final results after considering bids:')
+    print(f'You: {final_p_points}, Opponent: {final_c_points}')
+    if final_p_points < final_c_points:
+        print("You lost")
+    elif final_c_points == final_p_points:
+        print("It's match")
+    else:
+        print("Congratulations, You won!")
+
+
 def main():
     deck = Deck()
     player = Player()
@@ -238,8 +276,7 @@ def main():
     starting_player_clear_musik(chosen_musik, game)
     for i in range(10):
         play_round(game)
-    print(f'You have {game._player._points} points,'
-          f' Opponent have {game._computer._points} points')
+    summary(game)
 
 
 if __name__ == "__main__":
