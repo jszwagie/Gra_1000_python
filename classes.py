@@ -159,7 +159,7 @@ class Computer(Player):
     def __init__(self):
         super().__init__()
 
-    def make_move(self, opponent_card=''):
+    def make_move(self, game, opponent_card=None):
         # This is a simple sketch, before apllying an algorithm for making
         # moves, i start by playing the first card
         if self._hand:

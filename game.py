@@ -110,22 +110,22 @@ def points_battle(p_card, c_card, game):
     return next_round
 
 
-def cards_battle_p(p_card, c_card, game):
-    if p_card.suit == game.active_trump:
-        if c_card.suit == game.active_trump:
-            next_round = points_battle(p_card, c_card, game)
+def cards_battle_p(first_card, second_card, game):
+    if first_card.suit == game.active_trump:
+        if second_card.suit == game.active_trump:
+            next_round = points_battle(first_card, second_card, game)
         else:
-            game._player.add_points(p_card.points + c_card.points)
+            game._player.add_points(first_card.points + second_card.points)
             next_round = 'p'
     else:
-        if c_card.suit == game.active_trump:
-            game._computer.add_points(p_card.points + c_card.points)
+        if second_card.suit == game.active_trump:
+            game._computer.add_points(first_card.points + second_card.points)
             next_round = 'c'
         else:
-            if p_card.suit == c_card.suit:
-                next_round = points_battle(p_card, c_card, game)
+            if first_card.suit == second_card.suit:
+                next_round = points_battle(first_card, second_card, game)
             else:
-                game._player.add_points(p_card.points + c_card.points)
+                game._player.add_points(first_card.points + second_card.points)
                 next_round = 'p'
     return next_round
 
@@ -160,7 +160,7 @@ def play_round(game):
         played_p_card = game._player.play_card(card_number)
         print(f'You played: {played_p_card}.')
         check_declaration(played_p_card, game, game._player)
-        played_c_card = game._computer.make_move(played_p_card)
+        played_c_card = game._computer.make_move(game, played_p_card)
         print(f'Opponent played: {played_c_card}.')
         next_round = cards_battle_p(played_p_card, played_c_card, game)
         if next_round == 'p':
@@ -168,8 +168,9 @@ def play_round(game):
         else:
             print('Computer won')
     else:
-        played_c_card = game._computer.make_move()
+        played_c_card = game._computer.make_move(game)
         print(f'Opponent played: {played_c_card}.')
+        check_declaration(played_c_card, game, game._computer)
         print(game._player.cards_display())
         print(f'Choose a card to play(1-{game._player.cards_in_hand}): ')
         invalid_card = True
@@ -179,7 +180,7 @@ def play_round(game):
             invalid_card = check_played_card(card, played_c_card, game)
         played_p_card = game._player.play_card(card_number)
         print(f'You played: {played_p_card}.')
-        next_round = points_battle(played_p_card, played_c_card, game)
+        next_round = points_battle(played_p_card, played_c_card, game) # do zrobienia
         if next_round == 'p':
             print('You won!')
         else:
