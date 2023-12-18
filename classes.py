@@ -59,6 +59,7 @@ class Player:
         self._hand = []
         self._points = 0
         self._bid = 0
+        self._trumps = []
 
     def add_card(self, card):
         self._hand.append(card)
@@ -113,6 +114,19 @@ class Player:
             if queen_card in self._hand and king_card in self._hand:
                 trumps.append(suit)
         return trumps
+
+    def set_trumps(self):
+        trumps = self.have_trump()
+        self._trumps = trumps
+
+    def trump_played(self, trump):
+        self._trumps.remove(trump)
+
+    def suit_in_hand(self, suit):
+        for card in self._hand:
+            if card.suit == suit:
+                return True
+        return False
 
     @property
     def cards_in_hand(self):
@@ -177,6 +191,7 @@ class Computer(Player):
         possible_points += trump_points
         points_to_bid = min(max(100, possible_points), 360)
         points_to_bid -= points_to_bid % 10
+        points_to_bid += 10
         if points_to_bid > opponent_bid:
             return points_to_bid
         else:
@@ -238,6 +253,7 @@ class Game:
         self._computer = computer
         self._musiki = musiki
         self._round = 'p'
+        self._trump = ''
 
     def deal_the_cards(self):
         deck = self._deck.deck
@@ -255,3 +271,14 @@ class Game:
             return True
         else:
             return False
+
+    def trump_value(self, trump):
+        suits = {'Spades': 40, 'Hearts': 100, 'Clubs': 60, 'Diamonds': 80}
+        return suits.get(trump)
+
+    @property
+    def active_trump(self):
+        return self._trump
+
+    def set_trump(self, trump):
+        self._trump = trump
