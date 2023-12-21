@@ -21,12 +21,12 @@ class Card:
         return self._points
 
     def __str__(self):
-        desc = f'{self.name} of {self.suit}'
+        desc = f'{self._name} of {self._suit}'
         return desc
 
     def __eq__(self, other):
-        if (self.name == other._name and self.suit == other.suit and
-           self.points == other.points):
+        if (self._name == other._name and self._suit == other._suit and
+           self._points == other._points):
             return True
         else:
             return False
@@ -128,12 +128,12 @@ class Player:
         return False
 
     def _final_points(self):
-        if self._points < self.bid:
+        if self._points < self._bid:
             final_points = 0 - self._points
-        elif self.bid == 0:
+        elif self._bid == 0:
             final_points = self._points
         else:
-            final_points = self.bid
+            final_points = self._bid
         return (round(final_points/10)*10)
 
     @property
@@ -248,17 +248,13 @@ class Computer(Player):
         else:
             return 0
 
-    def decide_to_bid(self, opponent_bid):
-        points = self.possible_points(opponent_bid)
-        if points == 0:
-            return False
-        else:
-            return True
-
     def make_a_bid(self, opponent_bid):
         max_points = self.possible_points(opponent_bid)
-        bid = opponent_bid + choice([10, 20])
-        points = min(bid, max_points)
+        if max_points != 0:
+            bid = opponent_bid + choice([10, 20])
+            points = min(bid, max_points)
+        else:
+            points = 0
         return points
 
     def choose_musik(self):
