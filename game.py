@@ -49,7 +49,7 @@ def input_musik():
     bad_input = True
     while bad_input:
         try:
-            chosen_musik = input(">")
+            chosen_musik = str(input(">").strip())
             is_exit(chosen_musik)
             chosen_musik = int(chosen_musik) - 1
             if chosen_musik in [0, 1]:
@@ -65,8 +65,8 @@ def bidding(game):
     list_of_bids = [str(element) for element in list(range(100, 361))]
     list_of_bids = list_of_bids[::10]
     list_of_bids.append("pass")
-    player = game._player
-    computer = game._computer
+    player = game.player
+    computer = game.computer
     not_passed = True
     while not_passed:
         print("How much are you bidding?:")
@@ -75,7 +75,7 @@ def bidding(game):
         if str(player_bid).lower() == "pass":
             print("You passed")
             player.set_bid(0)
-            game._round = 'c'
+            game.set_round('c')
             not_passed = False
             chosen_musik = computer.choose_musik()
             continue
@@ -92,7 +92,7 @@ def bidding(game):
             continue
         else:
             print('Opponent passed')
-            game._round = 'p'
+            game.set_round('p')
             computer.set_bid(0)
             not_passed = False
             print('Choose a musik to get(1,2): ')
@@ -100,102 +100,41 @@ def bidding(game):
     return chosen_musik
 
 
-def points_battle(p_card, c_card):
-    if p_card.points > c_card.points:
-        return p_card
-    else:
-        return c_card
-
-
-def cards_battle(first_card, second_card, game):
-    if first_card.suit == game.active_trump:
-        if second_card.suit == game.active_trump:
-            winning_card = points_battle(first_card, second_card)
-        else:
-            winning_card = first_card
-    else:
-        if second_card.suit == game.active_trump:
-            winning_card = second_card
-        else:
-            if first_card.suit == second_card.suit:
-                winning_card = points_battle(first_card, second_card)
-            else:
-                winning_card = first_card
-    return winning_card
-
-
-def battle(player_card, computer_card, game):
-    points_for_win = player_card.points + computer_card.points
-    if game._round == 'p':
-        winning_card = cards_battle(player_card, computer_card, game)
-        if winning_card == player_card:
-            game._player.add_points(points_for_win)
-            next_round = 'p'
-        else:
-            game._computer.add_points(points_for_win)
-            next_round = 'c'
-    else:
-        winning_card = cards_battle(computer_card, player_card, game)
-        if winning_card == computer_card:
-            game._computer.add_points(points_for_win)
-            next_round = 'c'
-        else:
-            game._player.add_points(points_for_win)
-            next_round = 'p'
-    return next_round
-
-
-def check_declaration(p_card, game, player):
-    is_trump_card = (p_card.suit in player._trumps)
-    if is_trump_card and p_card.name in ['Queen', 'King']:
-        print(f"Newly declared trump: {p_card.suit}")
-        game.set_trump(p_card.suit)
-        player.trump_played(p_card.suit)
-        player.add_points(game.trump_value(p_card.suit))
-
-
-def check_played_card(p_card, c_card, game):
-    base_suit = c_card.suit
-    if p_card.suit == base_suit or p_card.suit == game.active_trump:
-        return False
-    else:
-        if (game._player.suit_in_hand(c_card.suit) or
-           game._player.suit_in_hand(game.active_trump)):
-            print("Wrong card. Try card with simmilar suit or with trump")
-            return True
-        else:
-            return False
-
-
 def play_round(game):
-    if game._round == 'p':
-        print(game._player.cards_display())
-        print(f'Choose a card to play(1-{game._player.cards_in_hand}): ')
+    if game.round == 'p':
+        print(game.player.cards_display())
+        print(f'Choose a card to play(1-{game.player.cards_in_hand}): ')
         card_number = choose_card_input(game)
-        played_p_card = game._player.play_card(card_number)
+        played_p_card = game.player.play_card(card_number)
         print(f'You played: {played_p_card}.')
-        check_declaration(played_p_card, game, game._player)
-        played_c_card = game._computer.make_move(game, played_p_card)
+        new_trump = game.check_declaration(played_p_card, game.player)
+        if new_trump:
+            print(f"Newly declared trump: {new_trump}")
+        played_c_card = game.computer.make_move(game, played_p_card)
         print(f'Opponent played: {played_c_card}.')
-        next_round = battle(played_p_card, played_c_card, game)
+        next_round = game.battle(played_p_card, played_c_card)
         if next_round == 'p':
             print('You won!')
         else:
             print('Opponent won')
     else:
-        played_c_card = game._computer.make_move(game)
+        played_c_card = game.computer.make_move(game)
         print(f'Opponent played: {played_c_card}.')
-        check_declaration(played_c_card, game, game._computer)
-        print(game._player.cards_display())
-        print(f'Choose a card to play(1-{game._player.cards_in_hand}): ')
+        new_trump = game.check_declaration(played_c_card, game.computer)
+        if new_trump:
+            print(f"Newly declared trump: {new_trump}")
+        print(game.player.cards_display())
+        print(f'Choose a card to play(1-{game.player.cards_in_hand}): ')
         invalid_card = True
         while invalid_card:
             card_number = choose_card_input(game)
-            card = game._player._hand[card_number]
-            invalid_card = check_played_card(card, played_c_card, game)
-        played_p_card = game._player.play_card(card_number)
+            card = game.player.hand[card_number]
+            invalid_card = game.check_played_card(card, played_c_card)
+            if invalid_card:
+                print("Wrong card. Try card with simmilar suit or with trump")
+        played_p_card = game.player.play_card(card_number)
         print(f'You played: {played_p_card}.')
-        next_round = battle(played_p_card, played_c_card, game)
+        next_round = game.battle(played_p_card, played_c_card)
         if next_round == 'p':
             print('You won!')
         else:
@@ -204,63 +143,49 @@ def play_round(game):
 
 
 def starting_player_clear_musik(chosen_musik, game):
-    if game._round == 'p':
-        game._player.add_from_musik(game._musiki[chosen_musik])
-        print(game._player.cards_display())
+    if game.round == 'p':
+        game.player.add_from_musik(game.musiki[chosen_musik])
+        print(game.player.cards_display())
         print("Choose two cards to discard (number, number)(1-12):")
         cards = input_cards_to_discard()
-        card_1, card_2 = game._player.remove_after_musik(cards)
+        card_1, card_2 = game.player.remove_after_musik(cards)
         print(f"You discarded: {card_1}, {card_2}.")
-        game._player.set_trumps()
-        game._computer.set_trumps()
     else:
-        musik = game._musiki[chosen_musik]
+        musik = game.musiki[chosen_musik]
         print(f"Opponent chose {chosen_musik+1} Musik: {musik}")
-        game._computer.add_from_musik(musik)
-        card_1, card_2 = game._computer.remove_after_musik()
-        game._player.set_trumps()
-        game._computer.set_trumps()
-
-
-def count_final_points(points, bid):
-    if points < bid:
-        final_points = 0 - points
-    elif bid == 0:
-        final_points = points
-    else:
-        final_points = bid
-    return (round(final_points/10)*10)
+        game.computer.add_from_musik(musik)
+        card_1, card_2 = game.computer.remove_after_musik()
+    game.set_trumps_for_players()
 
 
 def summary(game):
-    p_points = game._player._points
-    c_points = game._computer._points
-    p_bid = game._player.bid
-    c_bid = game._computer.bid
+    p_points = game.player.points
+    c_points = game.computer.points
+    p_bid = game.player.bid
+    c_bid = game.computer.bid
     print(f"You've got {p_points} points,"
           f' Opponent has got {c_points} points')
-    if p_bid > 0:
-        print(f'You bidded {p_bid}')
-    else:
-        print("You passed")
-    if c_bid > 0:
-        print(f'Opponent bidded {c_bid}')
-    else:
-        print("Opponent passed")
-    final_p_points = count_final_points(p_points, p_bid)
-    final_c_points = count_final_points(c_points, c_bid)
+    print(f'You bidded {p_bid}' if p_bid > 0 else "You passed")
+    print(f'Opponent bidded {c_bid}' if c_bid > 0 else "Opponent passed")
+    final_p_points, final_c_points, result = game.count_final_points()
     print('Final points are going to be rounded')
     print('Final results after considering bids:')
     print(f'You: {final_p_points}, Opponent: {final_c_points}')
-    if final_p_points < final_c_points:
+    if result == 'c':
         print("You lost")
-    elif final_c_points == final_p_points:
+    elif result == 'm':
         print("It's match")
-    else:
+    elif result == 'p':
         print("Congratulations, You won!")
 
 
-def main():
+def intro(game):
+    print('Welcome to the game "1000", cards are being dealt.')
+    print('At any moment you can type exit to exit the game.')
+    print(game.player.cards_display())
+
+
+def initialize_game():
     deck = Deck()
     player = Player()
     computer = Computer()
@@ -268,16 +193,17 @@ def main():
     deck.generate_deck()
     deck.shuffle_deck()
     game = Game(deck, player, computer, musiki)
-    print('Welcome to the game "1000", cards are being dealt.')
-    print('At any moment you can type exit to exit the game.')
+    return game
+
+
+def play_game(game):
     game.deal_the_cards()
-    print(game._player.cards_display())
+    intro(game)
     chosen_musik = bidding(game)
     starting_player_clear_musik(chosen_musik, game)
     for i in range(10):
         play_round(game)
-    summary(game)
 
 
-if __name__ == "__main__":
-    main()
+# main do innego pliku, funkcje zamienić na metody game: oddzielić
+    # całkowicie interfejs od logiki

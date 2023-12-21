@@ -105,7 +105,6 @@ class Player:
         self._points += points
 
     def have_trump(self):
-        # suits = {'Spades': 40, 'Hearts': 100, 'Clubs': 60, 'Diamonds': 80}
         trumps = []
         suits = ['Spades', 'Hearts', 'Clubs', 'Diamonds']
         for suit in suits:
@@ -128,6 +127,15 @@ class Player:
                 return True
         return False
 
+    def _final_points(self):
+        if self._points < self.bid:
+            final_points = 0 - self._points
+        elif self.bid == 0:
+            final_points = self._points
+        else:
+            final_points = self.bid
+        return (round(final_points/10)*10)
+
     @property
     def cards_in_hand(self):
         return len(self._hand)
@@ -135,6 +143,14 @@ class Player:
     @property
     def bid(self):
         return self._bid
+
+    @property
+    def points(self):
+        return self._points
+
+    @property
+    def hand(self):
+        return self._hand
 
 
 class Musik:
@@ -311,9 +327,106 @@ class Game:
         suits = {'Spades': 40, 'Hearts': 100, 'Clubs': 60, 'Diamonds': 80}
         return suits.get(trump)
 
+    def count_final_points(self):
+        final_p_points = self._player._final_points()
+        final_c_points = self._computer._final_points()
+        if final_p_points < final_c_points:
+            result = 'c'
+        elif final_c_points == final_p_points:
+            result = 'm'
+        else:
+            result = 'p'
+        return final_p_points, final_c_points, result
+
     @property
     def active_trump(self):
         return self._trump
 
+    @property
+    def player(self):
+        return self._player
+
+    @property
+    def computer(self):
+        return self._computer
+
+    @property
+    def round(self):
+        return self._round
+
+    @property
+    def musiki(self):
+        return self._musiki
+
     def set_trump(self, trump):
         self._trump = trump
+
+    def set_round(self, new_round):
+        self._round = new_round
+
+    def set_trumps_for_players(self):
+        self._player.set_trumps()
+        self._computer.set_trumps()
+
+    def check_played_card(self, p_card, c_card):
+        base_suit = c_card.suit
+        if p_card.suit == base_suit or p_card.suit == self.active_trump:
+            return False
+        else:
+            if (self._player.suit_in_hand(c_card.suit) or
+               self._player.suit_in_hand(self.active_trump)):
+                return True
+            else:
+                return False
+
+    def check_declaration(self, p_card, player):
+        is_trump_card = (p_card.suit in player._trumps)
+        if is_trump_card and p_card.name in ['Queen', 'King']:
+            self.set_trump(p_card.suit)
+            player.trump_played(p_card.suit)
+            player.add_points(self.trump_value(p_card.suit))
+            return p_card.suit
+        else:
+            return None
+
+    def _points_battle(self, p_card, c_card):
+        if p_card.points > c_card.points:
+            return p_card
+        else:
+            return c_card
+
+    def _cards_battle(self, first_card, second_card):
+        if first_card.suit == self.active_trump:
+            if second_card.suit == self.active_trump:
+                winning_card = self._points_battle(first_card, second_card)
+            else:
+                winning_card = first_card
+        else:
+            if second_card.suit == self.active_trump:
+                winning_card = second_card
+            else:
+                if first_card.suit == second_card.suit:
+                    winning_card = self._points_battle(first_card, second_card)
+                else:
+                    winning_card = first_card
+        return winning_card
+
+    def battle(self, player_card, computer_card):
+        points_for_win = player_card.points + computer_card.points
+        if self._round == 'p':
+            winning_card = self._cards_battle(player_card, computer_card)
+            if winning_card == player_card:
+                self._player.add_points(points_for_win)
+                next_round = 'p'
+            else:
+                self._computer.add_points(points_for_win)
+                next_round = 'c'
+        else:
+            winning_card = self._cards_battle(computer_card, player_card)
+            if winning_card == computer_card:
+                self._computer.add_points(points_for_win)
+                next_round = 'c'
+            else:
+                self._player.add_points(points_for_win)
+                next_round = 'p'
+        return next_round
