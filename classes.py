@@ -21,7 +21,7 @@ class Card:
         return self._points
 
     def __str__(self):
-        desc = f'{self._name} of {self._suit}'
+        desc = f'{self._name} {self._suit}'
         return desc
 
     def __eq__(self, other):
@@ -34,7 +34,11 @@ class Card:
 
 class Deck:
     def __init__(self):
-        self._deck = []
+        self._cards = []
+
+    @property
+    def deck(self):
+        return self._cards
 
     def generate_deck(self):
         deck = []
@@ -44,14 +48,10 @@ class Deck:
             for figure, points in cards.items():
                 card = Card(figure, suit, points)
                 deck.append(card)
-        self._deck = deck
+        self._cards = deck
 
     def shuffle_deck(self):
-        shuffle(self._deck)
-
-    @property
-    def deck(self):
-        return self._deck
+        shuffle(self._cards)
 
 
 class Player:
@@ -60,6 +60,22 @@ class Player:
         self._points = 0
         self._bid = 0
         self._trumps = []
+
+    @property
+    def cards_in_hand(self):
+        return len(self._hand)
+
+    @property
+    def bid(self):
+        return self._bid
+
+    @property
+    def points(self):
+        return self._points
+
+    @property
+    def hand(self):
+        return self._hand
 
     def add_card(self, card):
         self._hand.append(card)
@@ -136,26 +152,10 @@ class Player:
             final_points = self._bid
         return (round(final_points/10)*10)
 
-    @property
-    def cards_in_hand(self):
-        return len(self._hand)
 
-    @property
-    def bid(self):
-        return self._bid
-
-    @property
-    def points(self):
-        return self._points
-
-    @property
-    def hand(self):
-        return self._hand
-
-
-class Musik:
+class Musik(Deck):
     def __init__(self):
-        self._cards = []
+        super().__init__()
 
     def add_card(self, card):
         self._cards.append(card)
@@ -185,10 +185,12 @@ class Computer(Player):
         else:
             return card.points
 
-    def pri_suit(self, card, suit):
+    def pri_suit(self, card, suit, game):
         priority = 0
         if card.suit == suit:
             priority += 100
+        elif card.suit == game.active_trump:
+            priority += 50
         priority += card.points
         return priority
 
@@ -205,7 +207,8 @@ class Computer(Player):
                 self._temporary_trump = trumps[0]
         if opponent_card:
             base_suit = opponent_card.suit
-            pri_cards = sorted(hand, key=lambda x: self.pri_suit(x, base_suit),
+            pri_cards = sorted(hand, key=lambda x:
+                               self.pri_suit(x, base_suit, game),
                                reverse=True)
             card_to_play_index = hand.index(pri_cards[0])
         else:
@@ -302,6 +305,26 @@ class Game:
         self._round = 'p'
         self._trump = ''
 
+    @property
+    def active_trump(self):
+        return self._trump
+
+    @property
+    def player(self):
+        return self._player
+
+    @property
+    def computer(self):
+        return self._computer
+
+    @property
+    def round(self):
+        return self._round
+
+    @property
+    def musiki(self):
+        return self._musiki
+
     def deal_the_cards(self):
         deck = self._deck.deck
         player_cards = deck[0:10]
@@ -333,26 +356,6 @@ class Game:
         else:
             result = 'p'
         return final_p_points, final_c_points, result
-
-    @property
-    def active_trump(self):
-        return self._trump
-
-    @property
-    def player(self):
-        return self._player
-
-    @property
-    def computer(self):
-        return self._computer
-
-    @property
-    def round(self):
-        return self._round
-
-    @property
-    def musiki(self):
-        return self._musiki
 
     def set_trump(self, trump):
         self._trump = trump

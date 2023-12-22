@@ -1,9 +1,18 @@
 from classes import Deck, Player, Musik, Computer, Game
 from sys import exit
+import os
+from time import sleep
+from colorama import Fore
+from colorama import Style
+
+
+def clear():
+    os.system('clear')
 
 
 def is_exit(inputted_data):
     if inputted_data.lower() == 'exit':
+        clear()
         exit()
 
 
@@ -25,6 +34,7 @@ def input_cards_to_discard():
         except Exception:
             print('I do not know what you mean.'
                   'Try again with "number, number".')
+            sleep(1)
     return cards_numbers
 
 
@@ -42,6 +52,7 @@ def choose_card_input(game):
                 raise Exception
         except Exception:
             print("There is no card with this number. Try again.")
+            sleep(1)
     return chosen_card - 1
 
 
@@ -61,6 +72,49 @@ def input_musik():
     return chosen_musik
 
 
+def card_colored(card):
+    suits = {
+        'Clubs': (' \u2663', Fore.BLACK),
+        'Diamonds': (' \u2666', Fore.RED),
+        'Hearts': (' \u2665', Fore.RED),
+        'Spades': (' \u2660', Fore.BLACK)
+    }
+    return (f'{suits[card.suit][1]}{card.name} '
+            f'{suits[card.suit][0]}{Style.RESET_ALL}')
+
+
+def cards_with_emoji(player):
+    list_of_cards = player.hand
+    new_list = []
+    suits = {
+        'Clubs': (' \u2663', Fore.BLACK),
+        'Diamonds': (' \u2666', Fore.RED),
+        'Hearts': (' \u2665', Fore.RED),
+        'Spades': (' \u2660', Fore.BLACK)
+    }
+    number = 1
+    for card in list_of_cards:
+        suit = card.suit
+        emoji = suits[suit][0]
+        des = f"{number}.{suits[suit][1]}{card.name}{emoji}{Style.RESET_ALL}"
+        new_list.append(des)
+        number += 1
+    joined_cards = ', '.join(new_list) + '.'
+    result = f"{Fore.BLUE}Yours cards{Style.RESET_ALL}: " + joined_cards
+    return result
+
+
+def waiting_for_opponent():
+    print("Waiting for opponent")
+    sleep(0.5)
+    print("Waiting for opponent.")
+    sleep(0.5)
+    print("Waiting for opponent..")
+    sleep(0.5)
+    print("Waiting for opponent...")
+    sleep(0.5)
+
+
 def bidding(game):
     list_of_bids = [str(element) for element in list(range(100, 361))]
     list_of_bids = list_of_bids[::10]
@@ -74,6 +128,7 @@ def bidding(game):
         is_exit(player_bid)
         if str(player_bid).lower() == "pass":
             print("You passed")
+            sleep(1)
             player.set_bid(0)
             game.set_round('c')
             not_passed = False
@@ -83,6 +138,7 @@ def bidding(game):
               computer.bid >= int(player_bid)):
             print("You must bid points between 100 and 360, "
                   "tens, higher than opponent or pass")
+            sleep(1)
             continue
         else:
             player.set_bid(int(player_bid))
@@ -90,41 +146,52 @@ def bidding(game):
         if computer_bid != 0:
             computer.set_bid(computer_bid)
             print(f"Opponent bidded: {computer.bid}")
+            sleep(1)
             continue
         else:
             print('Opponent passed')
             game.set_round('p')
             computer.set_bid(0)
             not_passed = False
+            sleep(1)
             print('Choose a musik to get(1,2): ')
             chosen_musik = input_musik()
+            sleep(1)
     return chosen_musik
 
 
 def play_round(game):
     if game.round == 'p':
-        print(game.player.cards_display())
+        print(cards_with_emoji(game.player))
         print(f'Choose a card to play(1-{game.player.cards_in_hand}): ')
         card_number = choose_card_input(game)
         played_p_card = game.player.play_card(card_number)
-        print(f'You played: {played_p_card}.')
+        sleep(0.5)
+
+        print(f'You played: {card_colored(played_p_card)}.')
         new_trump = game.check_declaration(played_p_card, game.player)
         if new_trump:
             print(f"Newly declared trump: {new_trump}")
+        sleep(0.5)
+        waiting_for_opponent()
         played_c_card = game.computer.make_move(game, played_p_card)
-        print(f'Opponent played: {played_c_card}.')
+        print(f'Opponent played: {card_colored(played_c_card)}.')
         next_round = game.battle(played_p_card, played_c_card)
+        sleep(1)
         if next_round == 'p':
             print('You won!')
         else:
             print('Opponent won')
+        sleep(1)
+
     else:
         played_c_card = game.computer.make_move(game)
-        print(f'Opponent played: {played_c_card}.')
+        print(f'Opponent played: {card_colored(played_c_card)}.')
         new_trump = game.check_declaration(played_c_card, game.computer)
         if new_trump:
             print(f"Newly declared trump: {new_trump}")
-        print(game.player.cards_display())
+        sleep(1)
+        print(cards_with_emoji(game.player))
         print(f'Choose a card to play(1-{game.player.cards_in_hand}): ')
         invalid_card = True
         while invalid_card:
@@ -133,27 +200,38 @@ def play_round(game):
             invalid_card = game.check_played_card(card, played_c_card)
             if invalid_card:
                 print("Wrong card. Try card with simmilar suit or with trump")
+                sleep(1)
         played_p_card = game.player.play_card(card_number)
-        print(f'You played: {played_p_card}.')
+
+        print(f'Opponent played: {card_colored(played_c_card)}.')
+        print(f'You played: {card_colored(played_p_card)}.')
+        sleep(1)
         next_round = game.battle(played_p_card, played_c_card)
         if next_round == 'p':
             print('You won!')
         else:
             print('Opponent won')
+        sleep(1)
+
     game._round = next_round
 
 
 def starting_player_clear_musik(chosen_musik, game):
     if game.round == 'p':
         game.player.add_from_musik(game.musiki[chosen_musik])
-        print(game.player.cards_display())
+        print(cards_with_emoji(game.player))
         print("Choose two cards to discard (number, number)(1-12):")
         cards = input_cards_to_discard()
         card_1, card_2 = game.player.remove_after_musik(cards)
-        print(f"You discarded: {card_1}, {card_2}.")
+        cards_discarded = f"{card_colored(card_1)}, {card_colored(card_2)}"
+        print(f"You discarded: {cards_discarded}.")
+        sleep(1)
+
     else:
         musik = game.musiki[chosen_musik]
-        print(f"Opponent chose {chosen_musik+1} Musik: {musik}")
+        cards_colored = (f"{card_colored(musik.cards_in_musik()[0])},"
+                         f" {card_colored(musik.cards_in_musik()[1])}")
+        print(f"Opponent chose {chosen_musik+1} Musik: {cards_colored}")
         game.computer.add_from_musik(musik)
         card_1, card_2 = game.computer.remove_after_musik()
     game.set_trumps_for_players()
@@ -166,12 +244,21 @@ def summary(game):
     c_bid = game.computer.bid
     print(f"You've got {p_points} points,"
           f' Opponent has got {c_points} points')
+    sleep(1.5)
+
     print(f'You bidded {p_bid}' if p_bid > 0 else "You passed")
+    sleep(0.5)
     print(f'Opponent bidded {c_bid}' if c_bid > 0 else "Opponent passed")
     final_p_points, final_c_points, result = game.count_final_points()
+    sleep(1)
+
     print('Final points are going to be rounded')
+    sleep(1)
+
     print('Final results after considering bids:')
+    sleep(1)
     print(f'You: {final_p_points}, Opponent: {final_c_points}')
+    sleep(0.5)
     if result == 'c':
         print("You lost")
     elif result == 'm':
@@ -181,9 +268,13 @@ def summary(game):
 
 
 def intro(game):
+
     print('Welcome to the game "1000", cards are being dealt.')
+    sleep(1)
     print('At any moment you can type exit to exit the game.')
-    print(game.player.cards_display())
+    sleep(1)
+
+    print(cards_with_emoji(game.player))
 
 
 def initialize_game():
@@ -208,3 +299,4 @@ def play_game(game):
 
 # main do innego pliku, funkcje zamienić na metody game: oddzielić
     # całkowicie interfejs od logiki
+# przeczyścic po clearowniu musiku przez kompa, zeczy w musiku display
