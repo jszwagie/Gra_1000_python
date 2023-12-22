@@ -429,3 +429,12 @@ class Game:
                 self._player.add_points(points_for_win)
                 next_round = 'p'
         return next_round
+
+    def suits_dict(self):
+        suits = {
+            'Clubs': (' \u2663', "black b"),
+            'Diamonds': (' \u2666', "red b"),
+            'Hearts': (' \u2665', "red b"),
+            'Spades': (' \u2660', "black b")
+        }
+        return suits
