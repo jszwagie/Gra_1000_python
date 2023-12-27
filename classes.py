@@ -105,6 +105,9 @@ class Player:
     - add_from_musik: Adds cards from Musik to the player's hand.
     - set_bid: Sets the bid made by the player.
     - remove_after_musik: Removes cards from the player's hand after Musik.
+    - _points_from_trumps: Calculates points from trumps
+                           in player's hand.
+    - _max_bid: Calculates max bid the player can make.
     - _add_points: Adds points to the player's total points.
     - _have_trump: Checks trumps in player's hand.
     - _set_trumps: Sets the trumps for the player.
@@ -154,6 +157,22 @@ class Player:
         for card in cards_discard:
             self._hand.remove(card)
         return cards_discard
+
+    def _points_from_trumps(self):
+        trumps = self._have_trump()
+        points = 0
+        suits = {'Spades': 40, 'Hearts': 100, 'Clubs': 60, 'Diamonds': 80}
+        for element in trumps:
+            points += suits[element]
+        return points
+
+    def _max_bid(self):
+        max_points = self._points_from_trumps()
+        for card in self._hand:
+            max_points += card.points
+        max_points = max_points - (max_points % 10) + 10
+        max_points = max(110, max_points)
+        return max_points
 
     def _add_points(self, points):
         self._points += points
@@ -227,8 +246,6 @@ class Computer(Player):
     - _pri_suit: Function for sorting cards while choosing the best move
                   if opponent plays second.
     - make_move: Chosess a card to play by the opponent.
-    - _points_from_trumps: Calculates points from trumps
-                           in the computer's hand.
     - _possible_points: Calculates the possible points for a bid.
     - make_a_bid: Makes a bid for the opponent.
     - choose_musik: Chooses musik to get.
@@ -286,14 +303,6 @@ class Computer(Player):
                 card_to_play_index = hand.index(pri_cards[0])
         played_card = self.play_card(card_to_play_index)
         return played_card
-
-    def _points_from_trumps(self):
-        trumps = self._have_trump()
-        points = 0
-        suits = {'Spades': 40, 'Hearts': 100, 'Clubs': 60, 'Diamonds': 80}
-        for element in trumps:
-            points += suits[element]
-        return points
 
     def _possible_points(self, opponent_bid):
         possible_points = 0

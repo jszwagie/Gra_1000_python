@@ -23,7 +23,7 @@ def _clear_in_game(game):
     Special form of clearing terminal, this one take into account active trump.
     """
     _clear()
-    suits = game.suits_dict()
+    suits = suits_dict()
     if game.active_trump:
         trump = game.active_trump
         disp = Text(f"Active trump: {trump}{suits[trump][0]}",
@@ -261,11 +261,12 @@ def _bidding(game):
     """
     Function responsible for handling the bidding phase of the game.
     """
-    list_of_bids = [str(element) for element in list(range(100, 361))]
-    list_of_bids = list_of_bids[::10]
-    list_of_bids.append("pass")
     player = game.player
     computer = game.computer
+    l_range = range(100, player._max_bid() + 1)
+    list_of_bids = [str(element) for element in list(l_range)]
+    list_of_bids = list_of_bids[::10]
+    list_of_bids.append("pass")
     not_passed = True
     computer_bid = 0
     while not_passed:
@@ -293,8 +294,8 @@ def _bidding(game):
             continue
         elif (player_bid not in list_of_bids or
               computer.bid >= int(player_bid)):
-            info = ("You must bid points between 100 and 360 tens,"
-                    " higher than opponent or pass!")
+            info = (f"You must bid points between 100 and {player._max_bid()}"
+                    " tens, higher than opponent or pass!")
             Console().print(info, style="b red")
             sleep(3)
             _clear()
@@ -325,6 +326,7 @@ def _play_round(game):
     """
     Function responsible for handling the single round of the game.
     """
+    game.set_trumps_for_players()
     if game.round == 'p':
         card_number = _choose_card_input(game)
         played_p_card = game.player.play_card(card_number)
@@ -434,7 +436,7 @@ def _intro():
     _clear()
 
 
-def summary(game):
+def _summary(game):
     """
     Prints summary.
     """
@@ -468,12 +470,9 @@ def summary(game):
         markdown = Markdown("""# You won!""", style="green")
     Console().print(markdown)
     sleep(1)
-    Console().print("Click enter to quit:", style="magenta")
-    input()
-    _is_exit("exit")
 
 
-def initialize_game():
+def _initialize_game():
     """
     Function responsible for initializing the game.
     """
@@ -487,7 +486,7 @@ def initialize_game():
     return game
 
 
-def play_game(game):
+def _play_game(game):
     """
     Function responsible for starting the game and watching over the rounds.
     """
@@ -497,3 +496,38 @@ def play_game(game):
     _starting_player_clear_musik(chosen_musik, game)
     for i in range(10):
         _play_round(game)
+
+
+def _last_input():
+    """
+    Function responsible for getting valid input
+    for restarting or exiting the game.
+    """
+    bad_input = True
+    while bad_input:
+        try:
+            Console().print("Type exit to quit or restart to play again:",
+                            style="magenta")
+            inputted_data = str(input(">").strip())
+            _is_exit(inputted_data)
+            if inputted_data.lower() != "restart":
+                raise Exception
+            else:
+                bad_input = False
+                _clear()
+        except Exception:
+            Console().print('I do not know what you mean. Try again',
+                            style="b red")
+            sleep(2)
+            _clear()
+
+
+def game_loop():
+    """
+    Function responsible for game loop.
+    """
+    while True:
+        game = _initialize_game()
+        _play_game(game)
+        _summary(game)
+        _last_input()

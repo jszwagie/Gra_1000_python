@@ -1,10 +1,8 @@
-from game import initialize_game, summary, play_game
+from game import game_loop
 
 
 def main():
-    game = initialize_game()
-    play_game(game)
-    summary(game)
+    game_loop()
 
 
 if __name__ == "__main__":
