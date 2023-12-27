@@ -179,11 +179,24 @@ def _input_musik():
     return chosen_musik
 
 
+def suits_dict():
+    """
+    Function which stores emojis and colors/styles for cards.
+    """
+    suits = {
+        'Clubs': (' \u2663', "black b"),
+        'Diamonds': (' \u2666', "red b"),
+        'Hearts': (' \u2665', "red b"),
+        'Spades': (' \u2660', "black b")
+    }
+    return suits
+
+
 def _card_colored(card):
     """
     Function responsible for making graphical representation of a card.
     """
-    suits = Game(0, 0, 0, 0).suits_dict()
+    suits = suits_dict()
     card_c = Text(f'{card.name}{suits[card.suit][0]}',
                   style=suits[card.suit][1])
     return card_c

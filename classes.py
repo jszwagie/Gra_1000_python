@@ -394,8 +394,6 @@ class Game:
     - _cards_battle: Determines the winning card taking into account trumps
                      and suits.
     - battle: Gives a result of a round and determines next round.
-    - suits_dict: Returns a dictionary of suits with their symbols
-                  and color/styles codes.
     """
     def __init__(self, deck, player, computer, musiki):
         self._deck = deck
@@ -523,12 +521,3 @@ class Game:
                 self._player._add_points(points_for_win)
                 next_round = 'p'
         return next_round
-
-    def suits_dict(self):
-        suits = {
-            'Clubs': (' \u2663', "black b"),
-            'Diamonds': (' \u2666', "red b"),
-            'Hearts': (' \u2665', "red b"),
-            'Spades': (' \u2660', "black b")
-        }
-        return suits
