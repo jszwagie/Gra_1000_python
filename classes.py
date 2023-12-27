@@ -4,6 +4,24 @@ from random import shuffle, randint, choice
 
 @dataclass
 class Card:
+    """
+    :param name: _name - Name of the card.
+    :param type: str
+    :param name: _suit - Suit of the card.
+    :param type: str
+    :param name: _points - Points assigned to the card.
+    :param type: int
+
+    Represents a playing card with a name, suit, and points.
+
+    Properties:
+    - name - returns name
+    - suit - returns suit
+    - points - returns points
+
+    Methods:
+    - __eq__: shows how two objects can be compared
+    """
     _name: str
     _suit: str
     _points: int
@@ -29,6 +47,19 @@ class Card:
 
 
 class Deck:
+    """
+    :param name: _cards - Lisy of cards in deck.
+    :param type: list
+
+    Represents a deck of cards.
+
+    Properties:
+    - deck - returns list of cards in deck
+
+    Methods:
+    - generate_deck: Generates a standard deck of cards for "1000" game.
+    - shuffle_deck: Shuffles the deck of cards.
+    """
     def __init__(self):
         self._cards = []
 
@@ -51,6 +82,36 @@ class Deck:
 
 
 class Player:
+    """
+    :param name: _hand - List of cards in the player's hand.
+    :param type: list
+    :param name: _points - Points accumulated by the player.
+    :param type: int
+    :param name: _bid - Bid made by the player.
+    :param type: int
+    :param name: _trumps - List of trumps in the player's hand.
+    :param type: list
+
+    Represents a player in the game.
+
+    Properties:
+    - cards_in_hand - returns number of cards in hand
+    - bid - returns player bid
+    - points - returns player points
+    - hand - returns list of cards in player's hand
+
+    Methods:
+    - play_card: Plays a card from the player's hand.
+    - add_from_musik: Adds cards from Musik to the player's hand.
+    - set_bid: Sets the bid made by the player.
+    - remove_after_musik: Removes cards from the player's hand after Musik.
+    - _add_points: Adds points to the player's total points.
+    - _have_trump: Checks trumps in player's hand.
+    - _set_trumps: Sets the trumps for the player.
+    - _trump_played: Updates the trumps after a trump card is played.
+    - _suit_in_hand: Checks if a specific suit is in the player's hand.
+    - _final_points: Calculates the final points based on the bid.
+    """
     def __init__(self):
         self._hand = []
         self._points = 0
@@ -131,6 +192,14 @@ class Player:
 
 
 class Musik(Deck):
+    """
+    Represents Musik - a pile of cards that is selected after bidding.
+    Inheriting from Deck.
+
+    Additional methods:
+    - _clear: Clears the cards in Musik.
+    - cards_in_musik: List of cards in Musik.
+    """
     def __init__(self):
         super().__init__()
 
@@ -142,6 +211,32 @@ class Musik(Deck):
 
 
 class Computer(Player):
+    """
+    Represents an opponent in the game, inheriting from Player.
+
+    Additional params:
+    :param name: _temporary_trump - Helping param for making moves.
+    :param type: str
+    :param name: _trump_declared - Helping param saving info if
+                                   opponent declared a trump
+    :param type: bool
+
+    Additional methods:
+    - _pri_first: Function for sorting cards while choosing the best move
+                  if opponent plays first.
+    - _pri_suit: Function for sorting cards while choosing the best move
+                  if opponent plays second.
+    - make_move: Chosess a card to play by the opponent.
+    - _points_from_trumps: Calculates points from trumps
+                           in the computer's hand.
+    - _possible_points: Calculates the possible points for a bid.
+    - make_a_bid: Makes a bid for the opponent.
+    - choose_musik: Chooses musik to get.
+    - _choose_to_remove: Chooses cards to remove from the computer's hand
+                         after clearing musik.
+    - remove_after_musik: Removes cards from the computer's hand
+                          after clearing musik.
+    """
     def __init__(self):
         super().__init__()
         self._temporary_trump = ''
@@ -262,6 +357,46 @@ class Computer(Player):
 
 
 class Game:
+    """
+    :param name: _deck - Deck used in the game
+    :param type: object of class Deck
+    :param name: _player - Player in the game
+    :param type: object of class Player
+    :param name: _computer - Opponent in the game
+    :param type: object of class Computer
+    :param name: _musiki - Two musiks (piles of cards to choose after bidding)
+    :param type: list of objects of class Musik
+    :param name: _round - Round of the game
+    :param type: str
+    :param name: _trump - Declared trump in the game
+    :param type: str
+
+    Represents the overall game.
+
+    Properties:
+    - active_trump - the active declared trump suit in the game.
+    - player - player in the game.
+    - computer - opponent in the game.
+    - musiki -  two musiks
+    - round - current round of the game ('p' for player, 'c' for computer).
+
+    Methods:
+    - deal_the_cards: Deals cards to the players and musiks.
+    - _trump_value: Returns the point value of a trump suit.
+    - count_final_points: Counts the final points for both players
+                          and determines the result.
+    - _set_trump: Sets the active trump suit.
+    - set_round: Sets the current round of the game.
+    - set_trumps_for_players: Sets the trumps for both players.
+    - check_played_card: Checks if a played card is valid.
+    - check_declaration: Checks if a player made a declaration of trump.
+    - _points_battle: Determines the winning card by points.
+    - _cards_battle: Determines the winning card taking into account trumps
+                     and suits.
+    - battle: Gives a result of a round and determines next round.
+    - suits_dict: Returns a dictionary of suits with their symbols
+                  and color/styles codes.
+    """
     def __init__(self, deck, player, computer, musiki):
         self._deck = deck
         self._player = player

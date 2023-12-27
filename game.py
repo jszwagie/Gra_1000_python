@@ -10,12 +10,18 @@ from rich.table import Table
 
 
 def _clear():
+    """
+    Clears terminal and prints the markdown of the game.
+    """
     os.system('clear')
     markdown = Markdown("""# Welcome to the game "1000"!""")
     Console().print(markdown)
 
 
 def _clear_in_game(game):
+    """
+    Special form of clearing terminal, this one take into account active trump.
+    """
     _clear()
     suits = game.suits_dict()
     if game.active_trump:
@@ -28,12 +34,19 @@ def _clear_in_game(game):
 
 
 def _is_exit(inputted_data):
+    """
+    Checks if inputted data is exit. If it is - closes the program.
+    """
     if inputted_data.lower() == 'exit':
         os.system('clear')
         exit()
 
 
 def _input_cards_to_discard(game):
+    """
+    Function responsible for getting valid input
+    for cards to discard from players hand.
+    """
     bad_input = True
     while bad_input:
         try:
@@ -61,6 +74,10 @@ def _input_cards_to_discard(game):
 
 
 def _choose_card_input(game):
+    """
+    Function responsible for getting valid input for cards to play,
+    when player starts a round.
+    """
     bad_input = True
     while bad_input:
         try:
@@ -86,6 +103,10 @@ def _choose_card_input(game):
 
 
 def _choose_card_for_card_input(game, played_c_card, cplayed):
+    """
+    Function responsible for getting valid input for cards to play,
+    when opponent started a round.
+    """
     _clear_in_game(game)
     invalid_card = True
     bad_input = True
@@ -123,6 +144,9 @@ def _choose_card_for_card_input(game, played_c_card, cplayed):
 
 
 def _next_round_text(next_round, game):
+    """
+    Prints who won the round
+    """
     sleep(1)
     if next_round == 'p':
         Console().print('You won!', style="b bright_green underline")
@@ -133,6 +157,9 @@ def _next_round_text(next_round, game):
 
 
 def _input_musik():
+    """
+    Function responsible for getting valid input for choosing musik.
+    """
     bad_input = True
     while bad_input:
         try:
@@ -153,6 +180,9 @@ def _input_musik():
 
 
 def _card_colored(card):
+    """
+    Function responsible for making graphical representation of a card.
+    """
     suits = Game(0, 0, 0, 0).suits_dict()
     card_c = Text(f'{card.name}{suits[card.suit][0]}',
                   style=suits[card.suit][1])
@@ -160,6 +190,10 @@ def _card_colored(card):
 
 
 def _cards_with_emoji(player):
+    """
+    Function responsible for making graphical representation of cards
+    in players's hand.
+    """
     list_of_cards = player.hand
     number = 1
     joined = Text()
@@ -176,6 +210,9 @@ def _cards_with_emoji(player):
 
 
 def _waiting_for_opponent():
+    """
+    Prints waiting for opponent in stylish way.
+    """
     Console().print("Waiting for opponent", end="", style="b white")
     sleep(0.5)
     for i in range(2):
@@ -186,6 +223,9 @@ def _waiting_for_opponent():
 
 
 def _text_c_played(played_c_card):
+    """
+    Function responsible for printing card played by opponent.
+    """
     cplayed = Text()
     cplayed.append('Opponent played: ', style="blue b")
     cplayed.append(_card_colored(played_c_card))
@@ -194,6 +234,9 @@ def _text_c_played(played_c_card):
 
 
 def _text_p_played(played_p_card):
+    """
+    Function responsible for printing card played by player.
+    """
     played = Text()
     played.append('You played: ', style="blue b")
     played.append(_card_colored(played_p_card))
@@ -202,6 +245,9 @@ def _text_p_played(played_p_card):
 
 
 def _bidding(game):
+    """
+    Function responsible for handling the bidding phase of the game.
+    """
     list_of_bids = [str(element) for element in list(range(100, 361))]
     list_of_bids = list_of_bids[::10]
     list_of_bids.append("pass")
@@ -263,6 +309,9 @@ def _bidding(game):
 
 
 def _play_round(game):
+    """
+    Function responsible for handling the single round of the game.
+    """
     if game.round == 'p':
         card_number = _choose_card_input(game)
         played_p_card = game.player.play_card(card_number)
@@ -314,6 +363,10 @@ def _play_round(game):
 
 
 def _starting_player_clear_musik(chosen_musik, game):
+    """
+    Function responsible for handling the phase of cleaning musiks
+    after bidding.
+    """
     if game.round == 'p':
         game.player.add_from_musik(game.musiki[chosen_musik])
         cards = _input_cards_to_discard(game)
@@ -352,6 +405,9 @@ def _starting_player_clear_musik(chosen_musik, game):
 
 
 def _intro():
+    """
+    Prints intro for the game.
+    """
     _clear()
     sleep(1)
     info = Text('At any moment you can type exit to quit the game!',
@@ -366,6 +422,9 @@ def _intro():
 
 
 def summary(game):
+    """
+    Prints summary.
+    """
     _clear()
     p_points = game.player.points
     c_points = game.computer.points
@@ -402,6 +461,9 @@ def summary(game):
 
 
 def initialize_game():
+    """
+    Function responsible for initializing the game.
+    """
     deck = Deck()
     player = Player()
     computer = Computer()
@@ -413,6 +475,9 @@ def initialize_game():
 
 
 def play_game(game):
+    """
+    Function responsible for starting the game and watching over the rounds.
+    """
     game.deal_the_cards()
     _intro()
     chosen_musik = _bidding(game)
