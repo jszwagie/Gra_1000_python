@@ -215,7 +215,8 @@ class Computer(Player):
         possible_points += trump_points
         points_to_bid = min(max(100, possible_points), 360)
         points_to_bid -= points_to_bid % 10
-        points_to_bid += 10
+        if points_to_bid != 100:
+            points_to_bid += 10
         if points_to_bid > opponent_bid:
             return points_to_bid
         else:
@@ -232,12 +233,6 @@ class Computer(Player):
 
     def choose_musik(self):
         return randint(0, 1)
-
-    def remove_after_musik(self):
-        cards = self._choose_to_remove()
-        for card in cards:
-            self._hand.remove(card)
-        return cards
 
     def _choose_to_remove(self):
         trumps = self._have_trump()
@@ -258,6 +253,12 @@ class Computer(Player):
             cards_to_remove.append(card)
             copy = copy.remove(card)
         return cards_to_remove
+
+    def remove_after_musik(self):
+        cards = self._choose_to_remove()
+        for card in cards:
+            self._hand.remove(card)
+        return cards
 
 
 class Game:
