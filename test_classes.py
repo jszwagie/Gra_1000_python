@@ -349,7 +349,7 @@ def test_computer_make_bid_possible_points(monkeypatch):
                       Card("10", "Diamonds", 10),
                       Card("10", "Spades", 10)]
     opponent_bid = 100
-    monkeypatch.setattr("classes.choice", lambda x: 10)
+    monkeypatch.setattr("computer.choice", lambda x: 10)
     bid = computer.make_a_bid(opponent_bid)
     assert bid == 110
 
@@ -367,7 +367,7 @@ def test_computer_make_bid_higher_player_bid():
 
 def test_computer_choose_musik(monkeypatch):
     computer = Computer()
-    monkeypatch.setattr("classes.randint", lambda a, b: 0)
+    monkeypatch.setattr("computer.randint", lambda a, b: 0)
     musik_choice = computer.choose_musik()
     assert musik_choice == 0
 
@@ -382,7 +382,7 @@ def test_computer_choose_to_remove(monkeypatch):
     card_3 = Card("10", "Diamonds", 10)
     card_4 = Card("9", "Clubs", 0)
     computer._hand = [card_1, card_2, card_3, card_4]
-    monkeypatch.setattr("classes.choice", new_choice())
+    monkeypatch.setattr("computer.choice", new_choice())
     cards_to_remove = computer._choose_to_remove()
     assert len(cards_to_remove) == 2
     assert card_3 in cards_to_remove
@@ -399,7 +399,7 @@ def test_computer_remove_after_musik(monkeypatch):
     card_3 = Card("10", "Diamonds", 10)
     card_4 = Card("9", "Clubs", 0)
     computer._hand = [card_1, card_2, card_3, card_4]
-    monkeypatch.setattr("classes.choice", new_choice())
+    monkeypatch.setattr("computer.choice", new_choice())
     removed_cards = computer.remove_after_musik()
     assert len(removed_cards) == 2
     assert card_3 in removed_cards
@@ -610,16 +610,3 @@ def test_battle():
     assert player.points == 7
     assert computer.points == 14
     assert next_round == 'p'
-
-
-def test_suits_dict():
-    deck = Deck()
-    player = Player()
-    computer = Computer()
-    musiki = [Musik(), Musik()]
-    game = Game(deck, player, computer, musiki)
-    suits = game.suits_dict()
-    assert suits['Clubs'] == (' \u2663', "black b")
-    assert suits['Diamonds'] == (' \u2666', "red b")
-    assert suits['Hearts'] == (' \u2665', "red b")
-    assert suits['Spades'] == (' \u2660', "black b")
