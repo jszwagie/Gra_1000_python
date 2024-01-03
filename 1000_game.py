@@ -1,4 +1,4 @@
-from game import game_loop
+from game_interface import game_loop
 
 
 def main():

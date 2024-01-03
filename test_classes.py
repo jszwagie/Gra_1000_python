@@ -1,4 +1,9 @@
-from classes import Card, Deck, Player, Musik, Computer, Game
+from card import Card
+from deck import Deck
+from player import Player
+from musik import Musik
+from computer import Computer
+from game import Game
 
 
 class TestGame():
